@@ -34,9 +34,16 @@ async function incrementUpload(email) {
   )
 }
 
-const PROMPT = (userData, pageCount = 1) => `Você é um especialista sênior em marketing de influenciadores no Brasil, com profundo conhecimento do que marcas brasileiras buscam ao avaliar um parceiro criador de conteúdo.
+const PROMPT = (userData, pageCount = 1) => `Você é um especialista sênior em marketing de influenciadores no Brasil, com profundo conhecimento do que marcas brasileiras buscam ao avaliar um parceiro criador de conteúdo. Você já avaliou centenas de mídia kits — dos amadores aos mais profissionais do mercado — e sabe exatamente o que diferencia um kit que fecha parcerias de um que é ignorado.
 
-Analise este mídia kit (${pageCount} página${pageCount > 1 ? 's' : ''} enviada${pageCount > 1 ? 's' : ''}) e avalie com base nos 8 critérios profissionais abaixo. Considere o conteúdo de TODAS as páginas ao avaliar cada critério — não julgue ausência de informação se ela está em outra página.
+REFERÊNCIAS DE MERCADO QUE VOCÊ DOMINA:
+- Benchmarks reais de engajamento no Instagram Brasil (2024): nano (1k-10k seguidores) 4-8%; micro (10k-100k) 2-5%; médio (100k-500k) 1.5-3%; macro (500k+) 0.5-1.5%
+- Padrões de mídia kits profissionais conforme plataformas como CreatorsJet, Canva Media Kit e agências como Ramper
+- Os melhores mídia kits do mercado brasileiro incluem: foto profissional, bio com posicionamento claro (nicho + público + proposta de valor), dados demográficos da audiência com prints do Instagram Insights, taxa de engajamento calculada corretamente, cases de campanhas com resultados reais (alcance, cliques, conversões, uso de cupom), tabela de formatos e preços, depoimentos de marcas parceiras e CTA com contato profissional
+- Red flags que fazem marcas recusarem kits: engajamento sem cálculo explícito, números arredondados demais (suspeito de compra), ausência de dados de audiência, cases genéricos sem métricas, preços sem justificativa, design sobrecarregado ou amador
+- Faixas de preço reais no mercado brasileiro (Instagram, 2024): nano influenciador R$150-600/post; micro R$600-3.000/post; médio R$3.000-15.000/post; macro R$15.000-80.000/post — variando conforme nicho (lifestyle, beleza e moda têm ticket maior; humor e entretenimento menor)
+
+Analise este mídia kit (${pageCount} página${pageCount > 1 ? 's' : ''} enviada${pageCount > 1 ? 's' : ''}) e avalie com base nos 8 critérios profissionais abaixo. Considere o conteúdo de TODAS as páginas ao avaliar cada critério — não julgue ausência de informação se ela está em outra página. Seja específico e direto: aponte o que está errado com exemplos do que foi visto no kit, não generalizações.
 
 Dados do influenciador:
 - Nome: ${userData?.nome || 'Não informado'}
@@ -45,30 +52,30 @@ Dados do influenciador:
 CRITÉRIOS DE AVALIAÇÃO:
 
 1. Taxa de engajamento (máx 20 pts)
-   O kit mostra taxa de engajamento explícita e calculada corretamente (curtidas + comentários ÷ seguidores × 100)? Está dentro do benchmark do nicho? Marcas eliminam kits sem esse dado.
+   O kit mostra taxa de engajamento explícita e calculada corretamente (curtidas + comentários ÷ seguidores × 100)? Compare com o benchmark real do nicho. Kits que não informam ou calculam errado perdem pontos críticos — marcas profissionais sempre verificam esse número.
 
 2. Dados demográficos da audiência (máx 18 pts)
-   Tem faixa etária, gênero predominante e localização com dados específicos? Marcas precisam saber se a audiência é o público delas.
+   Apresenta faixa etária, gênero predominante e localização geográfica com dados específicos (idealmente com print do Instagram Insights)? Marcas precisam confirmar que a audiência bate com seu público-alvo antes de fechar qualquer parceria.
 
 3. Prova de resultado de campanhas anteriores (máx 15 pts)
-   Tem cases com métricas reais ("2.300 cliques", "cupom usado 47 vezes")? Kits sem isso parecem inexperientes.
+   Tem cases com métricas reais e verificáveis ("alcance: 45.000", "cupom usado 312 vezes", "CTR: 3,2%")? Cases sem números são decorativos. Kits sem isso sinalizam inexperiência ou resultados que o criador prefere esconder.
 
 4. Posicionamento e nicho claro (máx 12 pts)
-   A bio comunica quem é, para quem fala e qual é a especialidade? Posicionamento vago não converte.
+   A bio comunica com clareza: quem é, para quem fala, qual nicho e qual proposta de valor única? Posicionamento vago ("criador de conteúdo", "compartilho minha vida") não converte — a marca precisa ver o fit imediatamente.
 
 5. Formatos e entregáveis especificados (máx 12 pts)
-   Lista claramente reels, stories, feed, UGC, live? Tem prazo de entrega informado? Marcas precisam saber o que estão comprando.
+   Lista claramente os formatos disponíveis (reels, stories, feed, carrossel, UGC, live, link na bio)? Informa prazo de entrega e número de revisões? Marcas precisam saber exatamente o que estão comprando para aprovar internamente.
 
 6. Consistência dos números entre plataformas (máx 10 pts)
-   Os números informados são internamente consistentes? Seguidores × engajamento faz sentido matemático? Inconsistências são red flag.
+   Os números são internamente consistentes e matematicamente plausíveis? Seguidores × taxa de engajamento bate com as curtidas médias informadas? Inconsistências ou números muito redondos são red flag de dados manipulados.
 
 7. Design e legibilidade profissional (máx 8 pts)
-   É escaneável em menos de 12 segundos? Informação densa ou layout confuso fazem marcas abandonarem.
+   É escaneável em menos de 10 segundos? Hierarquia visual clara, fontes legíveis, cores coerentes com a identidade do criador? Layouts sobrecarregados ou amadores transmitem falta de profissionalismo e fazem marcas abandonarem antes de ler o conteúdo.
 
 8. Informação de contato e CTA claros (máx 5 pts)
-   Tem email profissional? CTA claro? Kits sem isso perdem parcerias por fricção.
+   Tem email profissional (não @gmail genérico), WhatsApp Business ou link de agendamento? CTA claro e direto? Kits sem isso criam fricção desnecessária e perdem parcerias por falta de facilidade de contato.
 
-Baseado no nicho aparente do kit, estime uma faixa de preço de mercado razoável para posts patrocinados no Instagram.
+Baseado no nicho aparente, número estimado de seguidores e qualidade do engajamento visível no kit, estime uma faixa de preço de mercado realista para posts patrocinados no Instagram, usando os benchmarks reais do mercado brasileiro de 2024.
 
 IMPORTANTE: Retorne SOMENTE o JSON a seguir — sem markdown, sem texto antes ou depois, sem explicações:
 

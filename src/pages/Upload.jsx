@@ -62,7 +62,7 @@ function LoadingAnalysis() {
         >
           {messages[idx]}
         </p>
-        <p className="text-[#444] text-xs mt-2">Isso leva cerca de 30 segundos</p>
+        <p className="text-[#444] text-xs mt-2">Análise concluída em segundos</p>
       </div>
     </div>
   )

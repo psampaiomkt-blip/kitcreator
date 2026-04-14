@@ -377,16 +377,13 @@ export default function Diagnostico() {
             Quer seu mídia kit ainda mais desejado pelas marcas?
           </h2>
           <p className="text-[#666] text-sm mb-5 leading-relaxed">
-            Seu mídia kit não é só um PDF.<br />
-            É o que decide se uma marca te chama… ou te ignora.<br />
-            Cansada(o) de ser ignorada(o) pelas marcas?<br />
-            A decisão que muda isso está a um clique.
+            Quer baixar seu diagnóstico completo com todos os pontos de melhoria detalhados e próximos passos? Clique no link abaixo.
           </p>
           <button
             onClick={() => navigate('/upgrade')}
             className="w-full bg-[#C8F135] text-[#0A0A0A] font-bold rounded-xl py-4 text-sm hover:bg-[#d4f54d] active:scale-[0.98] transition-all mb-2"
           >
-            Quero meu mídia kit mais profissional →
+            quero meu diagnóstico completo →
           </button>
           <p className="text-[#444] text-xs">pix, cartão ou boleto | condições especiais</p>
         </div>
@@ -401,7 +398,7 @@ export default function Diagnostico() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
                 d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
             </svg>
-            Baixar diagnóstico completo (PDF)
+            Baixar meu diagnóstico
           </button>
           <p className="text-[#333] text-xs mt-2">Inclui todos os 8 critérios com sugestões detalhadas</p>
         </div>

@@ -36,15 +36,18 @@ export default function Upgrade() {
         <div className="bg-[#161616] border border-[#C8F135]/20 rounded-2xl p-6 mb-4">
           {/* Price */}
           <div className="mb-6">
-            <div className="flex items-center gap-3 mb-1">
-              <div className="flex items-end gap-1">
-                <span className="text-[#555] text-base mb-1">R$</span>
-                <span className="text-5xl font-bold text-[#F0EDE8] leading-none">49</span>
-                <span className="text-3xl font-bold text-[#F0EDE8] leading-none">,90</span>
-              </div>
+            <div className="flex items-center gap-3 mb-2">
               <span className="bg-[#C8F135] text-[#0A0A0A] text-xs font-bold px-2.5 py-1 rounded-full">
                 5% OFF apenas neste mês
               </span>
+            </div>
+            <div className="flex items-end gap-3 mb-1">
+              <span className="text-[#555] text-sm line-through">R$ 49,90</span>
+              <div className="flex items-end gap-1">
+                <span className="text-[#555] text-base mb-1">R$</span>
+                <span className="text-5xl font-bold text-[#F0EDE8] leading-none">47</span>
+                <span className="text-3xl font-bold text-[#F0EDE8] leading-none">,41</span>
+              </div>
             </div>
             <p className="text-[#444] text-xs">Pagamento único</p>
           </div>

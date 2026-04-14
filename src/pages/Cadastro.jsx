@@ -79,10 +79,10 @@ export default function Cadastro() {
         {/* Headline */}
         <div className="text-center mb-10">
           <h1 className="text-4xl md:text-5xl font-serif text-[#F0EDE8] leading-tight mb-3">
-            Seu mídia kit está<br />perdendo parcerias.
+            Seu mídia kit pode estar te fazendo perder publi sem saber!
           </h1>
           <p className="text-[#666] text-sm leading-relaxed">
-            Analisamos o que está errado em 30 segundos.<br />Gratuito, sem cartão.
+            Em menos de 5 minutos, analisamos seu mídia kit com base nas principais métricas do mercado e te mostramos exatamente o que precisa ser ajustado.
           </p>
         </div>
 
@@ -139,7 +139,7 @@ export default function Cadastro() {
               <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[#444] text-sm select-none">@</span>
               <input
                 type="text"
-                placeholder="seuhandle"
+                placeholder="seuinstagram"
                 value={form.instagram}
                 onChange={handleChange('instagram')}
                 className="w-full bg-[#161616] border border-[#2A2A2A] text-[#F0EDE8] rounded-xl px-4 pl-8 py-3.5 text-sm placeholder-[#444] focus:border-[#C8F135] focus:outline-none transition-colors"
