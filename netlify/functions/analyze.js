@@ -1,5 +1,39 @@
 import Anthropic from '@anthropic-ai/sdk'
 
+const SUPABASE_URL = process.env.SUPABASE_URL
+const SUPABASE_KEY = process.env.SUPABASE_SECRET_KEY
+
+async function getUploads(email) {
+  const res = await fetch(
+    `${SUPABASE_URL}/rest/v1/usuarios?email=eq.${encodeURIComponent(email)}&select=id,uploads`,
+    {
+      headers: {
+        apikey: SUPABASE_KEY,
+        Authorization: `Bearer ${SUPABASE_KEY}`,
+      },
+    }
+  )
+  const data = await res.json()
+  return data && data.length > 0 ? data[0] : null
+}
+
+async function incrementUpload(email) {
+  const user = await getUploads(email)
+  if (!user) return
+  await fetch(
+    `${SUPABASE_URL}/rest/v1/usuarios?email=eq.${encodeURIComponent(email)}`,
+    {
+      method: 'PATCH',
+      headers: {
+        apikey: SUPABASE_KEY,
+        Authorization: `Bearer ${SUPABASE_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ uploads: (user.uploads || 0) + 1 }),
+    }
+  )
+}
+
 const PROMPT = (userData, pageCount = 1) => `Você é um especialista sênior em marketing de influenciadores no Brasil, com profundo conhecimento do que marcas brasileiras buscam ao avaliar um parceiro criador de conteúdo.
 
 Analise este mídia kit (${pageCount} página${pageCount > 1 ? 's' : ''} enviada${pageCount > 1 ? 's' : ''}) e avalie com base nos 8 critérios profissionais abaixo. Considere o conteúdo de TODAS as páginas ao avaliar cada critério — não julgue ausência de informação se ela está em outra página.
@@ -143,6 +177,20 @@ export const handler = async (event) => {
     }
   }
 
+  // Check upload limit
+  if (userData?.email) {
+    const user = await getUploads(userData.email.toLowerCase())
+    if (user && user.uploads >= 2) {
+      return {
+        statusCode: 403,
+        body: JSON.stringify({
+          error: 'limite_atingido',
+          message: 'Você já utilizou suas 2 análises gratuitas.',
+        }),
+      }
+    }
+  }
+
   const client = new Anthropic({
     apiKey: process.env.ANTHROPIC_API_KEY,
   })
@@ -178,6 +226,11 @@ export const handler = async (event) => {
     const raw = response.content[0].text.trim()
     const cleaned = raw.replace(/^```(?:json)?\n?/m, '').replace(/\n?```$/m, '').trim()
     const analysis = JSON.parse(cleaned)
+
+    // Increment upload counter
+    if (userData?.email) {
+      await incrementUpload(userData.email.toLowerCase())
+    }
 
     return {
       statusCode: 200,

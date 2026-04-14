@@ -3,6 +3,7 @@ import Cadastro from './pages/Cadastro'
 import Upload from './pages/Upload'
 import Diagnostico from './pages/Diagnostico'
 import Upgrade from './pages/Upgrade'
+import Privacidade from './pages/Privacidade'
 
 export default function App() {
   return (
@@ -12,6 +13,7 @@ export default function App() {
         <Route path="/upload" element={<Upload />} />
         <Route path="/diagnostico" element={<Diagnostico />} />
         <Route path="/upgrade" element={<Upgrade />} />
+        <Route path="/privacidade" element={<Privacidade />} />
       </Routes>
     </BrowserRouter>
   )
