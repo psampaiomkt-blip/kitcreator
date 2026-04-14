@@ -199,11 +199,11 @@ export default function Diagnostico() {
     }
 
     // Criteria
-    doc.setTextColor(80, 80, 80)
-    doc.setFontSize(8)
+    doc.setTextColor(0, 0, 0)
+    doc.setFontSize(13)
     doc.setFont('helvetica', 'bold')
     doc.text('ANÁLISE DETALHADA', margin, y)
-    y += 6
+    y += 8
 
     const sorted = [...analysis.criterios].sort(
       (a, b) => a.scoreObtido / a.scoreMaximo - b.scoreObtido / b.scoreMaximo
@@ -252,21 +252,37 @@ export default function Diagnostico() {
 
     // Next steps
     if (analysis.proximosPasso?.length) {
-      if (y > 240) { doc.addPage(); y = 20 }
-      doc.setTextColor(80, 80, 80)
-      doc.setFontSize(8)
+      if (y > 220) { doc.addPage(); y = 20 }
+
+      // Section background
+      const stepsHeight = analysis.proximosPasso.length * 14 + 24
+      doc.setFillColor(10, 10, 10)
+      doc.roundedRect(margin - 4, y - 6, W - margin * 2 + 8, stepsHeight, 3, 3, 'F')
+
+      doc.setTextColor(200, 241, 53)
+      doc.setFontSize(13)
       doc.setFont('helvetica', 'bold')
-      doc.text('PRÓXIMOS PASSOS', margin, y)
-      y += 6
-      doc.setFont('helvetica', 'normal')
+      doc.text('PRÓXIMOS PASSOS', margin, y + 2)
+      y += 12
+
       analysis.proximosPasso.forEach((s, i) => {
         if (y > 270) { doc.addPage(); y = 20 }
-        doc.setTextColor(160, 160, 160)
+        // Number badge
+        doc.setFillColor(200, 241, 53)
+        doc.circle(margin + 3, y - 1, 3, 'F')
+        doc.setTextColor(10, 10, 10)
+        doc.setFontSize(7)
+        doc.setFont('helvetica', 'bold')
+        doc.text(`${i + 1}`, margin + 1.8, y + 1)
+
+        doc.setTextColor(220, 220, 220)
         doc.setFontSize(9)
-        const lines = doc.splitTextToSize(`${i + 1}. ${s}`, W - margin * 2)
-        doc.text(lines, margin, y)
-        y += lines.length * 5 + 2
+        doc.setFont('helvetica', 'normal')
+        const lines = doc.splitTextToSize(s, W - margin * 2 - 12)
+        doc.text(lines, margin + 9, y + 1)
+        y += lines.length * 5 + 4
       })
+      y += 6
     }
 
     // Footer
@@ -275,7 +291,7 @@ export default function Diagnostico() {
       doc.setPage(i)
       doc.setTextColor(50, 50, 50)
       doc.setFontSize(7)
-      doc.text('Gerado por KitCreator • kitcreator.com.br', margin, 290)
+      doc.text('Gerado por KitCreator - todos os direitos reservados', margin, 290)
       doc.text(`${i}/${pages}`, W - margin, 290, { align: 'right' })
     }
 
@@ -357,33 +373,29 @@ export default function Diagnostico() {
 
         {/* CTA Banner */}
         <div className="bg-[#161616] border border-[#C8F135]/15 rounded-2xl p-6 mb-6 text-center">
-          {lockedCount > 0 && (
-            <p className="text-[#555] text-xs mb-1">
-              + {lockedCount} problema{lockedCount > 1 ? 's' : ''} bloqueado
-              {lockedCount > 1 ? 's' : ''}
-            </p>
-          )}
-          <h2 className="text-[#F0EDE8] text-xl font-serif mb-2">
-            Quer seu kit corrigido e profissional?
+          <h2 className="text-[#F0EDE8] text-xl font-serif mb-3">
+            Quer seu mídia kit ainda mais desejado pelas marcas?
           </h2>
           <p className="text-[#666] text-sm mb-5 leading-relaxed">
-            A IA reescreve sua bio, calcula o engajamento correto,<br />
-            monta a tabela de preços e entrega o PDF pronto para marcas.
+            Seu mídia kit não é só um PDF.<br />
+            É o que decide se uma marca te chama… ou te ignora.<br />
+            Cansada(o) de ser ignorada(o) pelas marcas?<br />
+            A decisão que muda isso está a um clique.
           </p>
           <button
             onClick={() => navigate('/upgrade')}
             className="w-full bg-[#C8F135] text-[#0A0A0A] font-bold rounded-xl py-4 text-sm hover:bg-[#d4f54d] active:scale-[0.98] transition-all mb-2"
           >
-            Corrigir meu kit por R$ 29/mês →
+            Quero meu mídia kit mais profissional →
           </button>
-          <p className="text-[#444] text-xs">Pix, cartão ou boleto • Cancele quando quiser</p>
+          <p className="text-[#444] text-xs">pix, cartão ou boleto | condições especiais</p>
         </div>
 
         {/* Download */}
         <div className="text-center mb-10">
           <button
             onClick={downloadPDF}
-            className="inline-flex items-center gap-2 text-[#666] text-sm hover:text-[#F0EDE8] transition-colors border border-[#2A2A2A] hover:border-[#444] rounded-xl px-5 py-2.5"
+            className="inline-flex items-center gap-2 bg-[#C8F135] text-[#0A0A0A] font-semibold text-sm rounded-xl px-5 py-2.5 hover:bg-[#d4f54d] active:scale-[0.98] transition-all"
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
@@ -413,14 +425,6 @@ export default function Diagnostico() {
           </div>
         )}
 
-        <div className="text-center mt-12">
-          <button
-            onClick={() => navigate('/upload')}
-            className="text-[#333] text-xs hover:text-[#555] transition-colors"
-          >
-            ← Analisar outro kit
-          </button>
-        </div>
       </div>
     </div>
   )

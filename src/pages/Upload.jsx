@@ -1,41 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 
-// Resize and compress image before sending to API
-async function compressImage(file) {
-  return new Promise((resolve) => {
-    const canvas = document.createElement('canvas')
-    const ctx = canvas.getContext('2d')
-    const img = new Image()
-    const url = URL.createObjectURL(file)
-
-    img.onload = () => {
-      const MAX = 1200
-      let { width, height } = img
-
-      if (width > MAX || height > MAX) {
-        if (width > height) {
-          height = Math.round((height * MAX) / width)
-          width = MAX
-        } else {
-          width = Math.round((width * MAX) / height)
-          height = MAX
-        }
-      }
-
-      canvas.width = width
-      canvas.height = height
-      ctx.drawImage(img, 0, 0, width, height)
-
-      const base64 = canvas.toDataURL('image/jpeg', 0.85).split(',')[1]
-      URL.revokeObjectURL(url)
-      resolve({ images: [base64], mediaType: 'image/jpeg', pageCount: 1 })
-    }
-
-    img.src = url
-  })
-}
-
 // Convert ALL pages of PDF to images using pdfjs (max 8 pages)
 async function pdfToImages(file) {
   const pdfjsLib = await import('pdfjs-dist')
@@ -120,9 +85,8 @@ export default function Upload() {
 
   const processFile = useCallback(async (f) => {
     if (!f) return
-    const valid = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf']
-    if (!valid.includes(f.type)) {
-      setError('Formato não suportado. Use JPG, PNG, WEBP ou PDF.')
+    if (f.type !== 'application/pdf') {
+      setError('Formato não suportado. Use um arquivo PDF.')
       return
     }
     if (f.size > 20 * 1024 * 1024) {
@@ -131,13 +95,7 @@ export default function Upload() {
     }
     setFile(f)
     setError(null)
-
-    if (f.type === 'application/pdf') {
-      setPreview({ type: 'pdf', name: f.name })
-    } else {
-      const url = URL.createObjectURL(f)
-      setPreview({ type: 'image', url, name: f.name })
-    }
+    setPreview({ type: 'pdf', name: f.name })
   }, [])
 
   const handleDrop = useCallback(
@@ -155,12 +113,7 @@ export default function Upload() {
     setError(null)
 
     try {
-      let imageData
-      if (file.type === 'application/pdf') {
-        imageData = await pdfToImages(file)
-      } else {
-        imageData = await compressImage(file)
-      }
+      const imageData = await pdfToImages(file)
 
       const userData = JSON.parse(localStorage.getItem('kitcreator_user') || '{}')
 
@@ -229,10 +182,10 @@ export default function Upload() {
 
         <div className="text-center mb-8">
           <h1 className="text-3xl font-serif text-[#F0EDE8] mb-2">
-            Envie seu mídia kit atual
+            Seu mídia kit ainda mais desejado pelas marcas <span className="text-[#C8F135]">(em minutos)</span>
           </h1>
-          <p className="text-[#666] text-sm">
-            PDF ou imagem • A IA analisa em segundos
+          <p className="text-[#666] text-sm leading-relaxed max-w-sm mx-auto">
+            A IA corrige os pontos do diagnóstico e entrega seu mídia kit atualizado, pronto para apresentar parcerias estratégicas às marcas.
           </p>
         </div>
 
@@ -259,40 +212,32 @@ export default function Upload() {
                 <p className="text-[#F0EDE8] text-sm font-medium">
                   Arraste aqui ou clique para selecionar
                 </p>
-                <p className="text-[#444] text-xs mt-1">JPG, PNG, WEBP ou PDF • Máx 20MB</p>
+                <p className="text-[#444] text-xs mt-1">PDF • Máx 20MB</p>
               </div>
             </div>
             <input
               ref={inputRef}
               type="file"
-              accept="image/jpeg,image/png,image/webp,application/pdf"
+              accept="application/pdf"
               className="hidden"
               onChange={(e) => processFile(e.target.files[0])}
             />
           </div>
         ) : (
           <div className="bg-[#161616] border border-[#2A2A2A] rounded-2xl p-4">
-            {preview.type === 'image' ? (
-              <img
-                src={preview.url}
-                alt="Preview do kit"
-                className="w-full max-h-52 object-contain rounded-xl mb-3"
-              />
-            ) : (
-              <div className="flex items-center gap-3 p-4 bg-[#2A2A2A] rounded-xl mb-3">
-                <div className="w-10 h-10 rounded-lg bg-[#C8F135]/10 flex items-center justify-center flex-shrink-0">
-                  <svg className="w-5 h-5 text-[#C8F135]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                </div>
-                <div>
-                  <p className="text-[#F0EDE8] text-sm font-medium truncate max-w-[240px]">
-                    {preview.name}
-                  </p>
-                  <p className="text-[#555] text-xs">PDF • Primeira página será analisada</p>
-                </div>
+            <div className="flex items-center gap-3 p-4 bg-[#2A2A2A] rounded-xl mb-3">
+              <div className="w-10 h-10 rounded-lg bg-[#C8F135]/10 flex items-center justify-center flex-shrink-0">
+                <svg className="w-5 h-5 text-[#C8F135]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
               </div>
-            )}
+              <div>
+                <p className="text-[#F0EDE8] text-sm font-medium truncate max-w-[240px]">
+                  {preview.name}
+                </p>
+                <p className="text-[#555] text-xs">PDF selecionado</p>
+              </div>
+            </div>
             <button
               onClick={() => { setFile(null); setPreview(null); setError(null) }}
               className="text-[#555] text-xs hover:text-[#888] transition-colors"
@@ -321,7 +266,7 @@ export default function Upload() {
         </button>
 
         <p className="text-center text-[#333] text-xs mt-3">
-          Análise gratuita. Seus arquivos não são armazenados.
+          Análise gratuita.
         </p>
       </div>
     </div>
