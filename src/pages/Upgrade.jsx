@@ -3,10 +3,10 @@ import { useNavigate } from 'react-router-dom'
 const KIWIFY_URL = 'https://pay.kiwify.com.br/zfYDXzh'
 
 const steps = [
-  'Diagnóstico completo: todos os critérios detalhados com explicações.',
-  'Mídia Kit reescrito pela IA a partir do diagnóstico',
-  'Copie e cole as alterações para uma apresentação editável em qualquer outra plataforma',
-  'Seu mídia kit pronto para prospectar de forma profissional as suas próximas parcerias',
+  'Diagnóstico completo: todos os 8 critérios detalhados com pontos positivos, problemas e sugestões de melhoria.',
+  'Mídia Kit reescrito pela IA a partir do diagnóstico — personalizado para o seu perfil e nicho.',
+  'Bônus: Guia de prospecção para marcas — modelos de mensagem, dicas de abordagem e os erros que fazem marcas ignorarem influenciadores.',
+  'Seu mídia kit pronto para prospectar de forma profissional as suas próximas parcerias.',
 ]
 
 export default function Upgrade() {

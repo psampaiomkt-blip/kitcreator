@@ -91,9 +91,17 @@ function CriterioCard({ criterio, locked }) {
           />
         </div>
 
-        <p className="text-[#666] text-xs leading-relaxed">{criterio.problema}</p>
+        {criterio.pontosPositivos && (
+          <p className="text-[#5fa84a] text-xs leading-relaxed mb-1.5">
+            ✓ {criterio.pontosPositivos}
+          </p>
+        )}
 
-        {criterio.status !== 'ok' && (
+        {criterio.problema && (
+          <p className="text-[#666] text-xs leading-relaxed">{criterio.problema}</p>
+        )}
+
+        {criterio.sugestao && (
           <p className="text-[#C8F135] text-xs mt-2 leading-relaxed">
             → {criterio.sugestao}
           </p>
@@ -194,26 +202,6 @@ export default function Diagnostico() {
     doc.text(resumoLines, ml + 4, y + 7)
     y += resumoH + 8
 
-    // ── FAIXA DE PREÇO ─────────────────────────────────────────
-    if (analysis.faixaPrecoSugerida) {
-      doc.setFillColor(240, 255, 200)
-      doc.setDrawColor(160, 200, 40)
-      doc.setLineWidth(0.3)
-      const precoLabel = 'Faixa de preço sugerida para o seu perfil:'
-      const precoLines = doc.splitTextToSize(
-        `${precoLabel} ${analysis.faixaPrecoSugerida}`,
-        contentW - 8
-      )
-      const precoH = precoLines.length * 5.2 + 10
-      doc.roundedRect(ml, y, contentW, precoH, 2, 2, 'FD')
-      doc.setTextColor(60, 90, 20)
-      doc.setFontSize(8.5)
-      doc.setFont('helvetica', 'bold')
-      doc.text(precoLines, ml + 4, y + 7)
-      doc.setFont('helvetica', 'normal')
-      y += precoH + 10
-    }
-
     // ── ANÁLISE DETALHADA (apenas 3 critérios gratuitos) ───────
     doc.setTextColor(20, 20, 20)
     doc.setFontSize(11)
@@ -240,11 +228,21 @@ export default function Diagnostico() {
       const [cr, cg, cb] = c.status === 'critico' ? [210, 50, 50]
         : c.status === 'atencao' ? [200, 130, 10] : [50, 150, 50]
 
-      const pLines = doc.splitTextToSize(c.problema, contentW - 7)
-      const sLines = c.status !== 'ok'
+      const posLines = c.pontosPositivos
+        ? doc.splitTextToSize(`✓ ${c.pontosPositivos}`, contentW - 7)
+        : []
+      const pLines = c.problema
+        ? doc.splitTextToSize(c.problema, contentW - 7)
+        : []
+      const sLines = c.sugestao
         ? doc.splitTextToSize(`Sugestão: ${c.sugestao}`, contentW - 7)
         : []
-      const blockH = 8 + 6 + pLines.length * 5 + (sLines.length > 0 ? sLines.length * 5 + 3 : 0) + 8
+
+      const contentHeight =
+        (posLines.length > 0 ? posLines.length * 4.8 + 3 : 0) +
+        (pLines.length > 0 ? pLines.length * 4.8 + 2 : 0) +
+        (sLines.length > 0 ? sLines.length * 4.8 + 3 : 0)
+      const blockH = 18 + contentHeight + 6
 
       if (y + blockH > H - 22) { doc.addPage(); y = 20 }
 
@@ -264,25 +262,37 @@ export default function Diagnostico() {
       doc.setTextColor(25, 25, 25)
       doc.text(c.nome, ml + 6, y + 7)
 
-      // Score + status badge
-      const badge = `${c.scoreObtido}/${c.scoreMaximo} pts  •  ${sc.label}`
+      // Score + status
       doc.setFont('helvetica', 'normal')
       doc.setFontSize(7.5)
       doc.setTextColor(cr, cg, cb)
-      doc.text(badge, ml + 6, y + 13)
+      doc.text(`${c.scoreObtido}/${c.scoreMaximo} pts  •  ${sc.label}`, ml + 6, y + 13)
+
+      let lineY = y + 20
+
+      // Pontos positivos
+      if (posLines.length > 0) {
+        doc.setTextColor(30, 110, 30)
+        doc.setFontSize(8)
+        doc.setFont('helvetica', 'normal')
+        doc.text(posLines, ml + 6, lineY)
+        lineY += posLines.length * 4.8 + 3
+      }
 
       // Problema
-      doc.setTextColor(70, 70, 70)
-      doc.setFontSize(8)
-      doc.text(pLines, ml + 6, y + 20)
+      if (pLines.length > 0) {
+        doc.setTextColor(70, 70, 70)
+        doc.setFontSize(8)
+        doc.text(pLines, ml + 6, lineY)
+        lineY += pLines.length * 4.8 + 2
+      }
 
       // Sugestão
       if (sLines.length > 0) {
-        const sY = y + 20 + pLines.length * 5 + 2
         doc.setTextColor(30, 100, 30)
         doc.setFont('helvetica', 'bold')
         doc.setFontSize(7.5)
-        doc.text(sLines, ml + 6, sY)
+        doc.text(sLines, ml + 6, lineY)
         doc.setFont('helvetica', 'normal')
       }
 
@@ -374,21 +384,6 @@ export default function Diagnostico() {
             </div>
           )}
         </div>
-
-        {/* Pricing suggestion */}
-        {analysis.faixaPrecoSugerida && (
-          <div className="bg-[#161616] border border-[#2A2A2A] rounded-2xl p-4 mb-6 flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-[#C8F135]/10 flex items-center justify-center flex-shrink-0">
-              <span className="text-[#C8F135] text-sm font-bold">R$</span>
-            </div>
-            <div>
-              <p className="text-[#444] text-xs">Faixa de preço sugerida para o seu perfil</p>
-              <p className="text-[#F0EDE8] text-sm font-medium mt-0.5">
-                {analysis.faixaPrecoSugerida}
-              </p>
-            </div>
-          </div>
-        )}
 
         {/* Criteria list */}
         <div className="mb-6">
