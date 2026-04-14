@@ -29,35 +29,39 @@ async function compressImage(file) {
 
       const base64 = canvas.toDataURL('image/jpeg', 0.85).split(',')[1]
       URL.revokeObjectURL(url)
-      resolve({ base64, mediaType: 'image/jpeg' })
+      resolve({ images: [base64], mediaType: 'image/jpeg', pageCount: 1 })
     }
 
     img.src = url
   })
 }
 
-// Convert first page of PDF to image using pdfjs
-async function pdfToImage(file) {
+// Convert ALL pages of PDF to images using pdfjs (max 8 pages)
+async function pdfToImages(file) {
   const pdfjsLib = await import('pdfjs-dist')
-  // Use unpkg CDN for worker — version matches installed package
   pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`
 
   const arrayBuffer = await file.arrayBuffer()
   const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise
-  const page = await pdf.getPage(1)
+  const totalPages = Math.min(pdf.numPages, 8)
+  const images = []
 
-  const viewport = page.getViewport({ scale: 1.8 })
-  const canvas = document.createElement('canvas')
-  canvas.width = viewport.width
-  canvas.height = viewport.height
+  for (let i = 1; i <= totalPages; i++) {
+    const page = await pdf.getPage(i)
+    const viewport = page.getViewport({ scale: 1.6 })
+    const canvas = document.createElement('canvas')
+    canvas.width = viewport.width
+    canvas.height = viewport.height
 
-  await page.render({
-    canvasContext: canvas.getContext('2d'),
-    viewport,
-  }).promise
+    await page.render({
+      canvasContext: canvas.getContext('2d'),
+      viewport,
+    }).promise
 
-  const base64 = canvas.toDataURL('image/jpeg', 0.85).split(',')[1]
-  return { base64, mediaType: 'image/jpeg' }
+    images.push(canvas.toDataURL('image/jpeg', 0.8).split(',')[1])
+  }
+
+  return { images, mediaType: 'image/jpeg', pageCount: totalPages }
 }
 
 // Loading screen shown during API call
@@ -153,7 +157,7 @@ export default function Upload() {
     try {
       let imageData
       if (file.type === 'application/pdf') {
-        imageData = await pdfToImage(file)
+        imageData = await pdfToImages(file)
       } else {
         imageData = await compressImage(file)
       }
@@ -164,8 +168,9 @@ export default function Upload() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          imageBase64: imageData.base64,
+          images: imageData.images,
           mediaType: imageData.mediaType,
+          pageCount: imageData.pageCount,
           userData,
         }),
       })

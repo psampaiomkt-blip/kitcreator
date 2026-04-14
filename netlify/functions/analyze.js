@@ -1,8 +1,8 @@
 import Anthropic from '@anthropic-ai/sdk'
 
-const PROMPT = (userData) => `Você é um especialista sênior em marketing de influenciadores no Brasil, com profundo conhecimento do que marcas brasileiras buscam ao avaliar um parceiro criador de conteúdo.
+const PROMPT = (userData, pageCount = 1) => `Você é um especialista sênior em marketing de influenciadores no Brasil, com profundo conhecimento do que marcas brasileiras buscam ao avaliar um parceiro criador de conteúdo.
 
-Analise este mídia kit e avalie com base nos 8 critérios profissionais abaixo.
+Analise este mídia kit (${pageCount} página${pageCount > 1 ? 's' : ''} enviada${pageCount > 1 ? 's' : ''}) e avalie com base nos 8 critérios profissionais abaixo. Considere o conteúdo de TODAS as páginas ao avaliar cada critério — não julgue ausência de informação se ela está em outra página.
 
 Dados do influenciador:
 - Nome: ${userData?.nome || 'Não informado'}
@@ -134,9 +134,9 @@ export const handler = async (event) => {
     }
   }
 
-  const { imageBase64, mediaType, userData } = body
+  const { images, mediaType, pageCount, userData } = body
 
-  if (!imageBase64) {
+  if (!images || images.length === 0) {
     return {
       statusCode: 400,
       body: JSON.stringify({ error: 'Imagem é obrigatória' }),
@@ -147,6 +147,16 @@ export const handler = async (event) => {
     apiKey: process.env.ANTHROPIC_API_KEY,
   })
 
+  // Build content array with all pages + prompt
+  const imageContents = images.map((img) => ({
+    type: 'image',
+    source: {
+      type: 'base64',
+      media_type: mediaType || 'image/jpeg',
+      data: img,
+    },
+  }))
+
   try {
     const response = await client.messages.create({
       model: 'claude-haiku-4-5-20251001',
@@ -155,17 +165,10 @@ export const handler = async (event) => {
         {
           role: 'user',
           content: [
-            {
-              type: 'image',
-              source: {
-                type: 'base64',
-                media_type: mediaType || 'image/jpeg',
-                data: imageBase64,
-              },
-            },
+            ...imageContents,
             {
               type: 'text',
-              text: PROMPT(userData),
+              text: PROMPT(userData, pageCount || images.length),
             },
           ],
         },
