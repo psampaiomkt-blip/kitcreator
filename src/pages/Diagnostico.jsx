@@ -128,171 +128,202 @@ export default function Diagnostico() {
 
     const doc = new jsPDF({ unit: 'mm', format: 'a4' })
     const W = doc.internal.pageSize.width
-    const margin = 20
+    const H = doc.internal.pageSize.height
+    const ml = 18   // margin left
+    const mr = 18   // margin right
+    const contentW = W - ml - mr
     let y = 0
 
-    // Header bar
+    // ── HEADER (dark) ──────────────────────────────────────────
     doc.setFillColor(10, 10, 10)
-    doc.rect(0, 0, W, 32, 'F')
+    doc.rect(0, 0, W, 36, 'F')
+
     doc.setTextColor(200, 241, 53)
-    doc.setFontSize(16)
+    doc.setFontSize(14)
     doc.setFont('helvetica', 'bold')
-    doc.text('KitCreator', margin, 14)
-    doc.setTextColor(100, 100, 100)
+    doc.text('KitCreator', ml, 13)
+
+    doc.setTextColor(150, 150, 150)
     doc.setFontSize(8)
     doc.setFont('helvetica', 'normal')
-    doc.text('Diagnóstico de Mídia Kit', margin, 21)
-    doc.setTextColor(70, 70, 70)
-    doc.text(
-      `${userData.nome} • @${userData.instagram} • ${new Date().toLocaleDateString('pt-BR')}`,
-      margin, 28
-    )
+    doc.text('Diagnóstico de Mídia Kit — Versão Gratuita', ml, 21)
 
-    y = 46
-
-    // Score
-    const scoreColor =
-      analysis.scoreTotal < 40 ? [255, 77, 77]
-      : analysis.scoreTotal < 70 ? [255, 176, 32]
-      : [200, 241, 53]
-    doc.setTextColor(...scoreColor)
-    doc.setFontSize(42)
-    doc.setFont('helvetica', 'bold')
-    doc.text(`${analysis.scoreTotal}`, margin, y)
     doc.setTextColor(100, 100, 100)
-    doc.setFontSize(14)
-    doc.text('/100', margin + 28, y)
-
-    y += 6
-    doc.setFontSize(9)
-    doc.setFont('helvetica', 'normal')
-    doc.setTextColor(80, 80, 80)
+    doc.setFontSize(7.5)
     doc.text(
-      `${analysis.problemasCriticos} problema(s) crítico(s) identificado(s)`,
-      margin, y
+      `${userData.nome}  •  @${userData.instagram}  •  ${new Date().toLocaleDateString('pt-BR')}`,
+      ml, 30
     )
 
-    y += 10
-    // Summary box
-    doc.setFillColor(24, 24, 24)
-    const summaryLines = doc.splitTextToSize(analysis.resumoGeral, W - margin * 2 - 8)
-    doc.roundedRect(margin, y, W - margin * 2, summaryLines.length * 5 + 8, 2, 2, 'F')
-    doc.setTextColor(160, 160, 160)
-    doc.setFontSize(9)
-    doc.text(summaryLines, margin + 4, y + 6)
-    y += summaryLines.length * 5 + 16
+    y = 48
 
-    // Pricing
+    // ── SCORE ──────────────────────────────────────────────────
+    const scoreColor =
+      analysis.scoreTotal < 40 ? [220, 60, 60]
+      : analysis.scoreTotal < 70 ? [210, 140, 20]
+      : [60, 160, 60]
+
+    doc.setTextColor(...scoreColor)
+    doc.setFontSize(40)
+    doc.setFont('helvetica', 'bold')
+    doc.text(`${analysis.scoreTotal}`, ml, y)
+
+    doc.setTextColor(140, 140, 140)
+    doc.setFontSize(12)
+    doc.setFont('helvetica', 'normal')
+    doc.text('/100', ml + 26, y - 2)
+
+    y += 4
+    doc.setFontSize(8.5)
+    doc.setTextColor(90, 90, 90)
+    doc.text(
+      `${analysis.problemasCriticos} problema${analysis.problemasCriticos !== 1 ? 's' : ''} crítico${analysis.problemasCriticos !== 1 ? 's' : ''} identificado${analysis.problemasCriticos !== 1 ? 's' : ''}`,
+      ml, y
+    )
+
+    // ── RESUMO GERAL ───────────────────────────────────────────
+    y += 8
+    doc.setFillColor(245, 245, 245)
+    doc.setDrawColor(220, 220, 220)
+    doc.setLineWidth(0.3)
+    const resumoLines = doc.splitTextToSize(analysis.resumoGeral, contentW - 8)
+    const resumoH = resumoLines.length * 5.2 + 10
+    doc.roundedRect(ml, y, contentW, resumoH, 2, 2, 'FD')
+    doc.setTextColor(60, 60, 60)
+    doc.setFontSize(8.5)
+    doc.text(resumoLines, ml + 4, y + 7)
+    y += resumoH + 8
+
+    // ── FAIXA DE PREÇO ─────────────────────────────────────────
     if (analysis.faixaPrecoSugerida) {
-      doc.setFillColor(200, 241, 53, 0.08)
-      doc.setDrawColor(200, 241, 53)
+      doc.setFillColor(240, 255, 200)
+      doc.setDrawColor(160, 200, 40)
       doc.setLineWidth(0.3)
-      doc.roundedRect(margin, y, W - margin * 2, 12, 2, 2, 'FD')
-      doc.setTextColor(200, 241, 53)
-      doc.setFontSize(9)
+      const precoLabel = 'Faixa de preço sugerida para o seu perfil:'
+      const precoLines = doc.splitTextToSize(
+        `${precoLabel} ${analysis.faixaPrecoSugerida}`,
+        contentW - 8
+      )
+      const precoH = precoLines.length * 5.2 + 10
+      doc.roundedRect(ml, y, contentW, precoH, 2, 2, 'FD')
+      doc.setTextColor(60, 90, 20)
+      doc.setFontSize(8.5)
       doc.setFont('helvetica', 'bold')
-      doc.text('Faixa de preço sugerida:', margin + 4, y + 8)
+      doc.text(precoLines, ml + 4, y + 7)
       doc.setFont('helvetica', 'normal')
-      doc.setTextColor(240, 237, 232)
-      doc.text(analysis.faixaPrecoSugerida, margin + 52, y + 8)
-      y += 20
+      y += precoH + 10
     }
 
-    // Criteria
-    doc.setTextColor(0, 0, 0)
-    doc.setFontSize(13)
+    // ── ANÁLISE DETALHADA (apenas 3 critérios gratuitos) ───────
+    doc.setTextColor(20, 20, 20)
+    doc.setFontSize(11)
     doc.setFont('helvetica', 'bold')
-    doc.text('ANÁLISE DETALHADA', margin, y)
+    doc.text('ANÁLISE DETALHADA', ml, y)
+    doc.setDrawColor(200, 241, 53)
+    doc.setLineWidth(0.5)
+    doc.line(ml, y + 2, ml + 55, y + 2)
+    y += 9
+
+    doc.setTextColor(130, 130, 130)
+    doc.setFontSize(7.5)
+    doc.setFont('helvetica', 'normal')
+    doc.text('Exibindo 3 de 8 critérios — versão gratuita', ml, y)
     y += 8
 
     const sorted = [...analysis.criterios].sort(
       (a, b) => a.scoreObtido / a.scoreMaximo - b.scoreObtido / b.scoreMaximo
     )
+    const visibleCriterios = sorted.slice(0, 3)
 
-    sorted.forEach((c) => {
-      if (y > 262) { doc.addPage(); y = 20 }
-
+    visibleCriterios.forEach((c) => {
       const sc = STATUS[c.status] || STATUS.atencao
-      const [r, g, b] = c.status === 'critico' ? [255, 77, 77]
-        : c.status === 'atencao' ? [255, 176, 32] : [100, 200, 80]
+      const [cr, cg, cb] = c.status === 'critico' ? [210, 50, 50]
+        : c.status === 'atencao' ? [200, 130, 10] : [50, 150, 50]
 
-      // Left accent line
-      doc.setDrawColor(r, g, b)
-      doc.setLineWidth(0.8)
-      doc.line(margin, y, margin, y + 22)
+      const pLines = doc.splitTextToSize(c.problema, contentW - 7)
+      const sLines = c.status !== 'ok'
+        ? doc.splitTextToSize(`Sugestão: ${c.sugestao}`, contentW - 7)
+        : []
+      const blockH = 8 + 6 + pLines.length * 5 + (sLines.length > 0 ? sLines.length * 5 + 3 : 0) + 8
 
+      if (y + blockH > H - 22) { doc.addPage(); y = 20 }
+
+      // Card background
+      doc.setFillColor(250, 250, 250)
+      doc.setDrawColor(230, 230, 230)
+      doc.setLineWidth(0.25)
+      doc.roundedRect(ml, y, contentW, blockH, 2, 2, 'FD')
+
+      // Status left bar
+      doc.setFillColor(cr, cg, cb)
+      doc.rect(ml, y, 2.5, blockH, 'F')
+
+      // Critério nome
       doc.setFont('helvetica', 'bold')
       doc.setFontSize(9)
-      doc.setTextColor(240, 237, 232)
-      doc.text(`${c.nome}`, margin + 4, y + 5)
+      doc.setTextColor(25, 25, 25)
+      doc.text(c.nome, ml + 6, y + 7)
 
-      doc.setTextColor(r, g, b)
-      doc.setFontSize(8)
-      doc.text(`${c.scoreObtido}/${c.scoreMaximo} pts • ${sc.label}`, margin + 4, y + 11)
-
+      // Score + status badge
+      const badge = `${c.scoreObtido}/${c.scoreMaximo} pts  •  ${sc.label}`
       doc.setFont('helvetica', 'normal')
-      doc.setTextColor(100, 100, 100)
-      const pLines = doc.splitTextToSize(c.problema, W - margin * 2 - 10)
-      doc.text(pLines, margin + 4, y + 17)
+      doc.setFontSize(7.5)
+      doc.setTextColor(cr, cg, cb)
+      doc.text(badge, ml + 6, y + 13)
 
-      if (c.status !== 'ok') {
-        const sLines = doc.splitTextToSize(`→ ${c.sugestao}`, W - margin * 2 - 10)
-        const nextY = y + 17 + pLines.length * 4.5
-        if (nextY + sLines.length * 4.5 < 275) {
-          doc.setTextColor(160, 200, 60)
-          doc.text(sLines, margin + 4, nextY)
-          y += 17 + (pLines.length + sLines.length) * 4.5 + 6
-        } else {
-          y += 17 + pLines.length * 4.5 + 6
-        }
-      } else {
-        y += 17 + pLines.length * 4.5 + 6
+      // Problema
+      doc.setTextColor(70, 70, 70)
+      doc.setFontSize(8)
+      doc.text(pLines, ml + 6, y + 20)
+
+      // Sugestão
+      if (sLines.length > 0) {
+        const sY = y + 20 + pLines.length * 5 + 2
+        doc.setTextColor(30, 100, 30)
+        doc.setFont('helvetica', 'bold')
+        doc.setFontSize(7.5)
+        doc.text(sLines, ml + 6, sY)
+        doc.setFont('helvetica', 'normal')
       }
+
+      y += blockH + 5
     })
 
-    // Next steps
-    if (analysis.proximosPasso?.length) {
-      if (y > 220) { doc.addPage(); y = 20 }
+    // ── CRITÉRIOS BLOQUEADOS (teaser) ──────────────────────────
+    if (y + 30 > H - 22) { doc.addPage(); y = 20 }
 
-      // Section background
-      const stepsHeight = analysis.proximosPasso.length * 14 + 24
-      doc.setFillColor(10, 10, 10)
-      doc.roundedRect(margin - 4, y - 6, W - margin * 2 + 8, stepsHeight, 3, 3, 'F')
+    const lockedCount = sorted.length - 3
+    doc.setFillColor(15, 15, 15)
+    doc.roundedRect(ml, y, contentW, 28, 2, 2, 'F')
 
-      doc.setTextColor(200, 241, 53)
-      doc.setFontSize(13)
-      doc.setFont('helvetica', 'bold')
-      doc.text('PRÓXIMOS PASSOS', margin, y + 2)
-      y += 12
+    doc.setTextColor(200, 241, 53)
+    doc.setFontSize(9)
+    doc.setFont('helvetica', 'bold')
+    doc.text(`+ ${lockedCount} critérios bloqueados na versão gratuita`, ml + 6, y + 9)
 
-      analysis.proximosPasso.forEach((s, i) => {
-        if (y > 270) { doc.addPage(); y = 20 }
-        // Number badge
-        doc.setFillColor(200, 241, 53)
-        doc.circle(margin + 3, y - 1, 3, 'F')
-        doc.setTextColor(10, 10, 10)
-        doc.setFontSize(7)
-        doc.setFont('helvetica', 'bold')
-        doc.text(`${i + 1}`, margin + 1.8, y + 1)
+    doc.setTextColor(160, 160, 160)
+    doc.setFontSize(8)
+    doc.setFont('helvetica', 'normal')
+    doc.text('Acesse o diagnóstico completo em kit-creator.netlify.app', ml + 6, y + 17)
 
-        doc.setTextColor(220, 220, 220)
-        doc.setFontSize(9)
-        doc.setFont('helvetica', 'normal')
-        const lines = doc.splitTextToSize(s, W - margin * 2 - 12)
-        doc.text(lines, margin + 9, y + 1)
-        y += lines.length * 5 + 4
-      })
-      y += 6
-    }
+    doc.setTextColor(100, 100, 100)
+    doc.setFontSize(7.5)
+    doc.text('Inclui todos os critérios, próximos passos detalhados e plano de ação.', ml + 6, y + 23)
 
-    // Footer
+    y += 36
+
+    // ── FOOTER ─────────────────────────────────────────────────
     const pages = doc.internal.getNumberOfPages()
     for (let i = 1; i <= pages; i++) {
       doc.setPage(i)
-      doc.setTextColor(50, 50, 50)
-      doc.setFontSize(7)
-      doc.text('Gerado por KitCreator - todos os direitos reservados', margin, 290)
-      doc.text(`${i}/${pages}`, W - margin, 290, { align: 'right' })
+      doc.setDrawColor(220, 220, 220)
+      doc.setLineWidth(0.3)
+      doc.line(ml, H - 12, W - mr, H - 12)
+      doc.setTextColor(160, 160, 160)
+      doc.setFontSize(6.5)
+      doc.setFont('helvetica', 'normal')
+      doc.text('Gerado por KitCreator - todos os direitos reservados', ml, H - 7)
+      doc.text(`${i} / ${pages}`, W - mr, H - 7, { align: 'right' })
     }
 
     doc.save(`diagnostico-kit-${userData.instagram}.pdf`)
